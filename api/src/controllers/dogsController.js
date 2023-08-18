@@ -1,69 +1,53 @@
-const { Dog, Temperament } = require('../models');
+const axios = require('axios');
+const { API_KEY } = process.env; // Importa la API_KEY desde las variables de entorno
+const { Temperament, Dog } = require('../db'); // Importa los modelos Temperament y Dog desde db.js
+const dogs = require('../routes/routesDog'); // Importa las rutas para perros (¿Es necesario?)
 
-const dogsController = {
-  getAllDogs: async (req, res) => {
-    try {
-      const dogs = await Dog.findAll({
-        include: [{ model: Temperament, attributes: ['name'] }],
-      });
-      res.json(dogs);
-    } catch (error) {
-      res.status(500).json({ error: 'Error fetching dogs' });
-    }
-  },
+const URL = `https://api.thedogapi.com/v1/breeds?${API_KEY}`; // Construye la URL de la API
 
-  getDogById: async (req, res) => {
-    const { idRaza } = req.params;
-    try {
-      const dog = await Dog.findByPk(idRaza, {
-        include: [{ model: Temperament, attributes: ['name'] }],
-      });
-      if (!dog) {
-        return res.status(404).json({ message: 'Dog not found' });
-      }
-      res.json(dog);
-    } catch (error) {
-      res.status(500).json({ error: 'Error fetching dog details' });
-    }
-  },
-
-  searchDogsByName: async (req, res) => {
-    const { name } = req.query;
-    try {
-      const dogs = await Dog.findAll({
-        where: {
-          name: { $iLike: `%${name}%` }, // Case-insensitive search
-        },
-        include: [{ model: Temperament, attributes: ['name'] }],
-      });
-      res.json(dogs);
-    } catch (error) {
-      res.status(500).json({ error: 'Error searching dogs' });
-    }
-  },
-
-  createDog: async (req, res) => {
-    const { name, height, weight, life_span, temperaments } = req.body;
-    try {
-      const newDog = await Dog.create({
-        name,
-        height,
-        weight,
-        life_span,
-      });
-      if (temperaments && temperaments.length > 0) {
-        const selectedTemperaments = await Temperament.findAll({
-          where: { name: temperaments },
-        });
-        await newDog.addTemperaments(selectedTemperaments);
-      }
-      res.status(201).json(newDog);
-    } catch (error) {
-      res.status(500).json({ error: 'Error creating dog' });
-    }
-  },
-
-  // Define otros métodos de acuerdo a las funcionalidades requeridas.
+// Función para obtener información de perros desde la API
+const getApiInfoDog = async () => {
+    const apiURL = await axios.get(URL);
+    const apiInfo = await apiURL.data.map(e => {
+        return {
+            id: e.id,
+            name: e.name,
+            image: e.image.url,
+            breed_group: e.breed_group,
+            temperament: e.temperament,
+            life_span: e.life_span,
+            weight_min: parseInt(e.weight.metric.slice(0, 2).trim()),
+            weight_max: parseInt(e.weight.metric.slice(4).trim()),
+            height_min: parseInt(e.height.metric.slice(0, 2).trim()),
+            height_max: parseInt(e.height.metric.slice(4).trim()),
+        };
+    });
+    return apiInfo;
 };
 
-module.exports = dogsController;
+// Función para obtener información de perros desde la base de datos
+const getDBInfoDog = async () => {
+    var dogsDB = await Dog.findAll({
+        include: {
+            model: Temperament,
+            attributes: ['name'],
+            through: {
+                attributes: [],
+            },
+        }
+    });
+    return dogsDB;
+};
+
+// Función para obtener información completa de perros combinando API y base de datos
+const getAllDogs = async () => {
+    const apiInfo = await getApiInfoDog();
+    const DBInfo = await getDBInfoDog();
+    const infoTotal = apiInfo.concat(DBInfo);
+    return infoTotal;
+};
+
+// Exporta las funciones para usarlas en otros módulos
+module.exports = {
+    getAllDogs, getApiInfoDog, getDBInfoDog
+};
