@@ -19,6 +19,7 @@ test('renders home page', () => {
       </Route>
     </MemoryRouter>
   );
+
   const homeTitle = screen.getByText(/Welcome to Woof/i);
   expect(homeTitle).toBeInTheDocument();
 
@@ -27,6 +28,7 @@ test('renders home page', () => {
 
 // Prueba de la página de detalles del perro (DogDetail)
 test('renders dog detail page', () => {
+  // Datos simulados de un perro para la prueba
   const mockDogData = {
     id: 1,
     name: 'Buddy',
@@ -41,7 +43,8 @@ test('renders dog detail page', () => {
     </MemoryRouter>
   );
 
-  const dogName = screen.getByText(/Buddy/i);
+  // Verificar que el nombre del perro se muestre en la página
+  const dogName = screen.getByText(mockDogData.name);
   expect(dogName).toBeInTheDocument();
 
   // Agrega más expectativas aquí para elementos clave de la página de detalles del perro (DogDetail)
@@ -57,9 +60,11 @@ test('searching for a dog', async () => {
     </MemoryRouter>
   );
   
+  // Obtener elementos de la barra de búsqueda y el botón de búsqueda
   const input = screen.getByPlaceholderText(/Search a dog.../i);
   const searchButton = screen.getByRole('button', { name: /search/i });
 
+  // Simular la entrada de texto en la barra de búsqueda y hacer clic en el botón de búsqueda
   fireEvent.change(input, { target: { value: 'Golden Retriever' } });
   fireEvent.click(searchButton);
 
