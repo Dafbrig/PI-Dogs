@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import NavBar from "../NavBar/NavBar";
 import styles from "./About.module.css";
-import myPhoto from "../../assets/dasdas.jpg";
+import myPhoto from "../../assets/IMG_20210403_180842635_HDR.jpg";
 
 export default function About() {
   return (
