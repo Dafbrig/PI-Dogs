@@ -4,7 +4,7 @@ import Home from './components/Home/Home';
 import DogDetail from './components/DogDetail/DogDetail';
 import DogCreation from './components/DogCreation/DogCreation';
 import About from './components/About/About';
-import styles from './App.module.css'
+import styles from "./App.css";
 
 function App() {
   return (

@@ -1,42 +1,29 @@
-import React, { Fragment } from "react";
-import Logo from "../../assets/favicon-32x32.png";
-import styles from "./NavBar.module.css";
-import { Link } from "react-router-dom";
-import SearchBar from "../SearchBar/SearchBar";
+import styles from './Pagination.module.css'
 
-export default function NavBar() {
-  return (
-    <Fragment>
-      {/* La barra de navegación principal */}
-      <div className={styles.nav}>
-        <div className={styles.TitleAndSearchBar}>
-          {/* Sección de logo y título */}
-          <div className={styles.logoAndTitle}>
-            <Link to="/home">
-              {/* El logo de Woof */}
-              <img
-                id="logoHenry"
-                src={Logo}
-                alt="a happy dog icon"
-                className={styles.logo}
-              />
-            </Link>
-            <div>
-              {/* El título del sitio */}
-              <h1>Woof</h1>
-              <p>The dog's page</p>
-            </div>
-          </div>
-          <div>
-            {/* La barra de búsqueda */}
-            <SearchBar />
-          </div>
-        </div>
-        <div className={styles.aboutNavButton}>
-          {/* Enlace a la página "About" */}
-          <Link to="/about">About</Link>
-        </div>
-      </div>
-    </Fragment>
-  );
-}
+export default function Pagination({ dogsPerPage, allDogs, pagination, currentPage }) {
+    const pageNumbers = []
+
+    // Calcula el número total de páginas en función de la cantidad total de perros y perros por página.
+    for (let i = 1; i <= Math.ceil(allDogs / dogsPerPage); i++) {
+        pageNumbers.push(i)
+    }
+    
+    return (
+        <nav>
+            <ul className={styles.crumbs}>
+                {pageNumbers &&
+                    pageNumbers.map(number => (
+                        <li className={styles.number} key={number}>
+                            {/* Renderiza cada número de página como un botón */}
+                            <div
+                                className={currentPage === number ? styles.crumb__active : styles.crumb}
+                                onClick={() => pagination(number)}
+                            >
+                                {number}
+                            </div>
+                        </li>
+                    ))}
+            </ul>
+        </nav>
+    )
+};
